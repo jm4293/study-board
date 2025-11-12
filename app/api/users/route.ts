@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDataSource } from "@/config/data-source";
-import { User, UserAccount } from "@/database/entities";
-import { UserRepository } from "@/database/repositories";
+import { UserAccountRepository, UserRepository } from "@/database/repositories";
 
 export async function GET() {
-  try {
-    const dataSource = await getDataSource();
-    const userRepository = dataSource.getRepository(User).extend(UserRepository);
+  const dataSource = await getDataSource();
+  const userRepository = new UserRepository(dataSource.manager);
 
+  try {
     const users = await userRepository.find();
 
     return NextResponse.json({
@@ -27,6 +26,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const dataSource = await getDataSource();
+  const userRepository = new UserRepository(dataSource.manager);
+  const userAccountRepository = new UserAccountRepository(dataSource.manager);
+
   try {
     const body = await request.json();
     const { username, nickname, email, password } = body;
@@ -40,10 +43,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const dataSource = await getDataSource();
-    const userRepository = dataSource.getRepository(User);
-    const userAccountRepository = dataSource.getRepository(UserAccount);
 
     const existingEmail = await userAccountRepository.findOne({ where: { email } });
     if (existingEmail) {
