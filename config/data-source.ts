@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import { User, UserAccount, UserVisit, Board, BoardComment, BoardImage } from "../database/entities";
 
 export const AppDataSource = new DataSource({
   type: "mysql",
@@ -8,11 +9,11 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || "root",
   password: process.env.DB_PASSWORD || "123456789",
   database: process.env.DB_DATABASE || "app",
-  synchronize: process.env.NODE_ENV !== "production", // 개발 환경에서만 자동 스키마 동기화
+  synchronize: false,
   logging: process.env.NODE_ENV !== "production",
-  entities: ["src/entities/**/*.ts"],
-  migrations: ["src/migrations/**/*.ts"],
-  subscribers: ["src/subscribers/**/*.ts"],
+  entities: [User, UserAccount, UserVisit, Board, BoardComment, BoardImage],
+  migrations: [],
+  subscribers: [],
 });
 
 let isInitialized = false;
@@ -31,7 +32,7 @@ export const initializeDatabase = async () => {
   return AppDataSource;
 };
 
-export const getDatabase = async () => {
+export const getDataSource = async () => {
   if (!isInitialized) {
     await initializeDatabase();
   }

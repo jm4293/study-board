@@ -21,17 +21,13 @@ CREATE TABLE IF NOT EXISTS UserAccount (
     user_id BIGINT NOT NULL,
     email VARCHAR(100),
     password VARCHAR(255),
-    provider ENUM('LOCAL', 'GOOGLE', 'KAKAO', 'NAVER', 'GITHUB') DEFAULT 'LOCAL',
-    provider_id VARCHAR(255),
     refresh_token TEXT,
     last_login_at TIMESTAMP NULL,
     login_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_provider_account (user_id, provider),
     UNIQUE KEY unique_email (email),
-    INDEX idx_provider_id (provider_id), 
     INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -119,10 +115,10 @@ INSERT INTO User (username, nickname, status) VALUES
 ('user2', '사용자2', 'ACTIVE');
 
 -- 사용자 계정 정보
-INSERT INTO UserAccount (user_id, email, password, provider, login_count) VALUES 
-(1, 'admin@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'LOCAL', 0),
-(2, 'user1@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'LOCAL', 0),
-(3, 'user2@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'LOCAL', 0);
+INSERT INTO UserAccount (user_id, email, password, login_count) VALUES 
+(1, 'admin@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 0),
+(2, 'user1@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 0),
+(3, 'user2@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 0);
 
 -- 샘플 게시글
 INSERT INTO Board (user_id, title, content, board_type, is_notice) VALUES 
