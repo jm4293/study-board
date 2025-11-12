@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "package-rm": "rm -rf .next node_modules",
+    "build-rm": "rm -rf .next",
+    "clear-all": "npm run build-rm && npm run package-rm"
   },
   "dependencies": {
     "mysql2": "^3.15.3",
