@@ -16,10 +16,9 @@ docker-compose down
 
 - Host: `localhost`
 - Port: `3308`
-- Database: `boarddb`
-- User: `boarduser`
-- Password: `boardpass`
-- Root Password: `password`
+- Database: `app`
+- User: `user`
+- Password: `password`
 
 ### 2. Next.js 개발 서버 실행 (로컬)
 
@@ -35,11 +34,7 @@ npm run dev
 
 ### 3. 환경 변수 설정
 
-`.env.local` 파일 생성:
-
-```env
-DATABASE_URL=mysql://root:password@localhost:3308/boarddb
-```
+`.env.local` 파일 생성
 
 ---
 
