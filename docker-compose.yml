@@ -1,33 +1,13 @@
 version: "3.8"
 
 services:
-  # Next.js Application
-  nextapp:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: board-nextapp
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD:-password}@mysql:3306/${MYSQL_DATABASE:-boarddb}
-    depends_on:
-      mysql:
-        condition: service_healthy
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
-    networks:
-      - board-network
-
   # MySQL Database
   mysql:
     image: mysql:8.0.35
+    tags: 8.0.35
     container_name: board-mysql
     ports:
-      - "3306:3306"
+      - "3308:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-boarddb}
