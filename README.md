@@ -1,6 +1,40 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## 🚀 Quick Start (Docker)
+
+**Docker를 사용한 빠른 시작 방법:**
+
+```bash
+# 1. 저장소 클론
+git clone <repository-url>
+cd board
+
+# 2. 환경 변수 설정
+cp .env.example .env
+
+# 3. Docker Compose 실행
+docker-compose up -d
+
+# 4. 브라우저에서 접속
+# http://localhost:3000
+```
+
+**서비스 구성:**
+
+- Next.js App: http://localhost:3000
+- MySQL 8.0.35: localhost:3306
+
+**중지 방법:**
+
+```bash
+docker-compose down
+```
+
+자세한 Docker 사용법은 [README-DOCKER.md](./README-DOCKER.md)를 참조하세요.
+
+---
+
+## Getting Started (로컬 개발)
 
 First, run the development server:
 
