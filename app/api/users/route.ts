@@ -14,7 +14,6 @@ export async function GET() {
       data: users,
     });
   } catch (error) {
-    console.error("Error fetching users:", error);
     return NextResponse.json(
       {
         success: false,
@@ -78,7 +77,6 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating user:", error);
     return NextResponse.json(
       {
         success: false,
