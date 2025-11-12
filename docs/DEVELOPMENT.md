@@ -1,6 +1,6 @@
 # 개발 가이드
 
-## Model vs Entity
+## 1. Model vs Entity
 
 ### Entity (엔티티)
 
@@ -96,103 +96,6 @@ export interface UserListResponse {
 
 ---
 
-### 실제 사용 예시
-
-#### 1. API 라우트에서 Entity를 Model로 변환
-
-```typescript
-// app/api/users/route.ts
-import { AppDataSource } from "@/config/data-source";
-import { User } from "@/database/entities/User";
-import { UserResponse } from "./types";
-
-export async function GET(request: Request) {
-  try {
-    const userRepository = AppDataSource.getRepository(User);
-    const users = await userRepository.find();
-
-    // Entity를 Response Model로 변환 (password 제외)
-    const response: UserResponse[] = users.map((user) => ({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      createdAt: user.createdAt.toISOString(),
-      // password는 응답에 포함하지 않음
-    }));
-
-    return Response.json({ data: response }, { status: 200 });
-  } catch (error) {
-    return Response.json({ error: "사용자 조회 실패" }, { status: 500 });
-  }
-}
-```
-
-#### 2. Request Model을 Entity로 변환하여 저장
-
-```typescript
-// app/api/users/route.ts
-import { CreateUserRequest, UserResponse } from "./types";
-
-export async function POST(request: Request) {
-  try {
-    const body: CreateUserRequest = await request.json();
-
-    // Request Model에서 Entity 생성
-    const userRepository = AppDataSource.getRepository(User);
-    const newUser = userRepository.create({
-      username: body.username,
-      password: body.password, // 실제로는 해시화 필요
-      email: body.email,
-    });
-
-    const savedUser = await userRepository.save(newUser);
-
-    // Entity를 Response Model로 변환
-    const response: UserResponse = {
-      id: savedUser.id,
-      username: savedUser.username,
-      email: savedUser.email,
-      createdAt: savedUser.createdAt.toISOString(),
-    };
-
-    return Response.json({ data: response }, { status: 201 });
-  } catch (error) {
-    return Response.json({ error: "사용자 생성 실패" }, { status: 400 });
-  }
-}
-```
-
-#### 3. Service 레이어에서 변환 로직 분리
-
-```typescript
-// service/UserService.ts
-import { User } from "@/database/entities/User";
-import { UserResponse, CreateUserRequest } from "@/app/api/users/types";
-
-export class UserService {
-  // Entity를 Response Model로 변환
-  static toResponse(user: User): UserResponse {
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      createdAt: user.createdAt.toISOString(),
-    };
-  }
-
-  // Request Model에서 Entity 생성 데이터 준비
-  static fromCreateRequest(request: CreateUserRequest): Partial<User> {
-    return {
-      username: request.username,
-      password: request.password, // 해시화 로직 추가 필요
-      email: request.email,
-    };
-  }
-}
-```
-
----
-
 ### 프로젝트 구조 권장사항
 
 ```
@@ -220,3 +123,157 @@ service/                # 비즈니스 로직 & 변환 로직
 - `database/entities/`: 데이터베이스 구조 정의 (Entity)
 - `app/api/{resource}/types.ts`: API 입출력 구조 정의 (Model)
 - `service/`: Entity ↔ Model 변환 로직 및 비즈니스 로직
+
+<br/>
+<br/>
+
+## 2. Form Validation (React Hook Form + Zod)
+
+### 설치
+
+```bash
+npm install react-hook-form zod @hookform/resolvers
+```
+
+### 기본 사용법
+
+#### 1. Zod 스키마 정의
+
+```typescript
+import { z } from "zod";
+
+const formSchema = z.object({
+  title: z.string().min(1, "제목은 최소 1자 이상이어야 합니다.").max(100, "제목은 최대 100자 이하여야 합니다."),
+  content: z.string().min(1, "내용은 최소 1자 이상이어야 합니다."),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+```
+
+#### 2. React Hook Form 설정
+
+```typescript
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+export default function BoardRegister() {
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit = (data: FormValues) => {
+    console.log(data);
+    // API 호출 로직
+  };
+
+  return <form onSubmit={handleSubmit(onSubmit)}>{/* 폼 내용 */}</form>;
+}
+```
+
+#### 3. Input 등록 및 에러 표시
+
+```typescript
+<div>
+  <Input
+    title="제목"
+    placeholder="제목을 입력해주세요"
+    {...register('title')}
+  />
+  {errors.title && (
+    <Text.PARAGRAPH text={errors.title.message} color="red" />
+  )}
+</div>
+
+<div>
+  <Textarea
+    title="내용"
+    placeholder="내용을 입력해주세요"
+    {...register('content')}
+  />
+  {errors.content && (
+    <Text.PARAGRAPH text={errors.content.message} color="red" />
+  )}
+</div>
+```
+
+#### 4. 제출 버튼
+
+```typescript
+<Button.CONTAINER text="등록하기" type="submit" disabled={isSubmitting} />
+```
+
+### 주요 기능
+
+| 기능           | 설명                | 사용법                                      |
+| -------------- | ------------------- | ------------------------------------------- |
+| `register`     | Input을 폼에 등록   | `{...register('fieldName')}`                |
+| `handleSubmit` | 폼 제출 처리        | `onSubmit={handleSubmit(onSubmit)}`         |
+| `getValues`    | 현재 폼 값 가져오기 | `getValues()` 또는 `getValues('fieldName')` |
+| `errors`       | 검증 에러 확인      | `errors.fieldName?.message`                 |
+| `isSubmitting` | 제출 중 상태        | `formState.isSubmitting`                    |
+
+### 전체 예시
+
+```typescript
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+const formSchema = z.object({
+  title: z.string().min(1, "제목은 필수입니다.").max(100),
+  content: z.string().min(1, "내용은 필수입니다."),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+export default function BoardRegister() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const response = await fetch("/api/boards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("등록 실패");
+
+      // 성공 처리
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <Input title="제목" placeholder="제목을 입력해주세요" {...register("title")} />
+        {errors.title && <Text.PARAGRAPH text={errors.title.message} color="red" />}
+      </div>
+
+      <div>
+        <Textarea title="내용" placeholder="내용을 입력해주세요" {...register("content")} />
+        {errors.content && <Text.PARAGRAPH text={errors.content.message} color="red" />}
+      </div>
+
+      <Button.CONTAINER text="등록하기" type="submit" disabled={isSubmitting} />
+    </form>
+  );
+}
+```
