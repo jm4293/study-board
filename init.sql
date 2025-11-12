@@ -1,6 +1,6 @@
 -- 초기 데이터베이스 설정
-CREATE DATABASE IF NOT EXISTS boarddb;
-USE boarddb;
+CREATE DATABASE IF NOT EXISTS app;
+USE app;
 
 -- User 테이블: 사용자 기본 정보
 CREATE TABLE IF NOT EXISTS User (

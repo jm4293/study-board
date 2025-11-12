@@ -5,16 +5,18 @@ services:
   mysql:
     image: mysql:8.0.35
     container_name: board-mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - "3308:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-boarddb}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-app}
       - MYSQL_USER=${MYSQL_USER:-boarduser}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-boardpass}
     volumes:
       - mysql-data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-password}"]
       interval: 10s
