@@ -11,8 +11,8 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-app}
-      - MYSQL_USER=${MYSQL_USER:-boarduser}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-boardpass}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-123456789}
     volumes:
       - mysql-data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
