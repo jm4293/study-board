@@ -5,6 +5,7 @@
 - **Stack**: Next.js 16, TypeScript, TypeORM, MySQL, Tailwind CSS
 - **구조**: App Router 기반 Next.js 프로젝트
 - **데이터베이스**: TypeORM을 사용한 MySQL 연결
+- **주 컬러**: 파란색 (Blue)
 
 ## 코딩 스타일
 
