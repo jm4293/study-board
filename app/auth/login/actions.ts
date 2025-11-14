@@ -16,7 +16,6 @@ export interface FormState {
 export async function loginUser(prevState: FormState | null, formData: FormData): Promise<FormState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  const redirectUrl = formData.get('redirect') as string | null;
 
   if (!email || !email.trim()) {
     return {
@@ -85,9 +84,7 @@ export async function loginUser(prevState: FormState | null, formData: FormData)
       email: userAccount.email || '',
     });
 
-    // 리다이렉트 URL 처리
-    const finalRedirectUrl = redirectUrl || '/home';
-    redirect(finalRedirectUrl);
+    redirect('/home');
   } catch (error) {
     // redirect()는 NEXT_REDIRECT 에러를 throw하는데, 이것은 정상 동작이므로 다시 throw
     if (

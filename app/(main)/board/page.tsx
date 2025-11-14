@@ -2,12 +2,12 @@ import Link from 'next/link';
 
 import { Button } from '@/component/common';
 
-import { getBoards } from '@/service/board/board.service';
+import { getBoardList } from '@/service/board/get-board-list.service';
 
 import BoardListClient from './BoardListClient';
 
 export default async function BoardPage() {
-  const { boards, pagination } = await getBoards(1, 10);
+  const { boards, pagination } = await getBoardList(1, 10);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

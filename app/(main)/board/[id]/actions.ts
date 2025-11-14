@@ -8,7 +8,13 @@ import { BoardRepository } from '@/database/repositories';
 
 import { getSession } from '@/share/utils/auth';
 
-export async function deleteBoard(boardId: number) {
+export async function deleteBoard(formData: FormData) {
+  const boardId = parseInt(formData.get('boardId') as string);
+
+  if (isNaN(boardId)) {
+    throw new Error('유효하지 않은 게시글 ID입니다');
+  }
+
   const session = await getSession();
 
   if (!session) {

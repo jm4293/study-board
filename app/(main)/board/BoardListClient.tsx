@@ -6,7 +6,9 @@ import { useEffect, useState } from 'react';
 
 import { Button, Card } from '@/component/common';
 
-import type { Board, Pagination } from '@/service/board/board.service';
+import type { Board, Pagination } from '@/service/board/get-board-list.service';
+
+import { formatDate, truncateContent } from '@/share/utils/format';
 
 interface BoardListClientProps {
   initialBoards: Board[];
@@ -42,22 +44,6 @@ export default function BoardListClient({ initialBoards, initialPagination }: Bo
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const truncateContent = (content: string, maxLength: number = 100) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength) + '...';
   };
 
   return (
@@ -196,4 +182,3 @@ export default function BoardListClient({ initialBoards, initialPagination }: Bo
     </>
   );
 }
-

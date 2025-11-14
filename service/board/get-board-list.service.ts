@@ -28,7 +28,7 @@ export interface GetBoardsResult {
   pagination: Pagination;
 }
 
-export async function getBoards(page: number = 1, limit: number = 10): Promise<GetBoardsResult> {
+export async function getBoardList(page: number = 1, limit: number = 10): Promise<GetBoardsResult> {
   const dataSource = await getDataSource();
   const boardRepository = new BoardRepository(dataSource.manager);
 
