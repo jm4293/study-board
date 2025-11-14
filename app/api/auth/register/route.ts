@@ -1,28 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDataSource } from "@/config/data-source";
 import { UserAccountRepository, UserRepository } from "@/database/repositories";
-
-export async function GET() {
-  const dataSource = await getDataSource();
-  const userRepository = new UserRepository(dataSource.manager);
-
-  try {
-    const users = await userRepository.find();
-
-    return NextResponse.json({
-      success: true,
-      data: users,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch users",
-      },
-      { status: 500 }
-    );
-  }
-}
+import { hashPassword } from "@/share/utils/password";
 
 export async function POST(request: NextRequest) {
   const dataSource = await getDataSource();
@@ -31,40 +10,64 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { username, nickname, email, password } = body;
+    const { username, email, password } = body;
 
-    if (!username || !nickname || !email || !password) {
+    if (!username || !email || !password) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields: username, nickname, email, password",
+          error: "필수 필드가 누락되었습니다: username, email, password",
         },
         { status: 400 }
       );
     }
 
-    const existingEmail = await userAccountRepository.findOne({ where: { email } });
+    // 이메일 중복 확인
+    const existingEmail = await userAccountRepository.findOne({
+      where: { email },
+    });
+
     if (existingEmail) {
       return NextResponse.json(
         {
           success: false,
-          error: "Email already exists",
+          error: "이미 사용중인 이메일입니다",
         },
         { status: 400 }
       );
     }
 
+    // 사용자명 중복 확인
+    const existingUser = await userRepository.findOne({
+      where: { username },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "이미 사용중인 사용자명입니다",
+        },
+        { status: 400 }
+      );
+    }
+
+    // 비밀번호 해싱
+    const hashedPassword = await hashPassword(password);
+
+    // 사용자 생성
     const user = userRepository.create({
       username,
-      nickname,
+      nickname: username,
     });
 
     const savedUser = await userRepository.save(user);
 
+    // 계정 생성
     const userAccount = userAccountRepository.create({
       userId: savedUser.id,
       email,
-      password,
+      password: hashedPassword,
     });
 
     await userAccountRepository.save(userAccount);
@@ -72,17 +75,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        data: savedUser,
+        message: "회원가입이 완료되었습니다",
+        data: {
+          id: savedUser.id,
+          username: savedUser.username,
+          email,
+        },
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to create user",
+        error: "회원가입에 실패했습니다",
       },
       { status: 500 }
     );
   }
 }
+

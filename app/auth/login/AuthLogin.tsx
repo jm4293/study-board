@@ -1,43 +1,46 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button, Input, Card, Link } from "@/component/common";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { Button, Card, Input, Link } from '@/component/common';
 
 export default function AuthLogin() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
   const [errors, setErrors] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+    setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const validateForm = () => {
     const newErrors = {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     };
 
     if (!formData.email) {
-      newErrors.email = "이메일을 입력해주세요";
+      newErrors.email = '이메일을 입력해주세요';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "올바른 이메일 형식이 아닙니다";
+      newErrors.email = '올바른 이메일 형식이 아닙니다';
     }
 
     if (!formData.password) {
-      newErrors.password = "비밀번호를 입력해주세요";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "비밀번호는 최소 8자 이상이어야 합니다";
+      newErrors.password = '비밀번호를 입력해주세요';
+    } else if (!/^\d+$/.test(formData.password)) {
+      newErrors.password = '비밀번호는 숫자만 입력 가능합니다';
+    } else if (formData.password.length < 4) {
+      newErrors.password = '비밀번호는 최소 4자리 이상이어야 합니다';
     }
 
     setErrors(newErrors);
@@ -54,18 +57,30 @@ export default function AuthLogin() {
     setIsLoading(true);
 
     try {
-      // TODO: API 호출
-      // API call here
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-      // 임시: 로그인 성공 시 홈으로 이동
-      setTimeout(() => {
-        router.push("/home");
-      }, 1000);
-    } catch {
-      // Error handling
+      const data = await response.json();
+
+      if (data.success) {
+        // 로그인 성공 시 홈으로 이동
+        const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/home';
+        router.push(redirectUrl);
+      } else {
+        setErrors({
+          email: '',
+          password: data.error || '로그인에 실패했습니다',
+        });
+      }
+    } catch (error) {
       setErrors({
-        email: "",
-        password: "로그인에 실패했습니다",
+        email: '',
+        password: '로그인에 실패했습니다',
       });
     } finally {
       setIsLoading(false);
@@ -108,7 +123,7 @@ export default function AuthLogin() {
                 name="password"
                 type="password"
                 label="비밀번호"
-                placeholder="8자 이상 입력하세요"
+                placeholder="숫자 4자리 이상"
                 value={formData.password}
                 onChange={handleChange}
                 error={errors.password}

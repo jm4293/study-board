@@ -23,9 +23,7 @@ export const initializeDatabase = async () => {
     try {
       await AppDataSource.initialize();
       isInitialized = true;
-      console.log("Database connection established successfully");
     } catch (error) {
-      console.error("Error during Data Source initialization:", error);
       throw error;
     }
   }
