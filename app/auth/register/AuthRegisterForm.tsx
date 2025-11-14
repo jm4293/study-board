@@ -1,13 +1,23 @@
+'use client';
+
 import Link from 'next/link';
+import { useActionState } from 'react';
 
 import { Card, Input, SubmitButton } from '@/component/common';
 
-import { registerUser } from './actions';
+import { type FormState, registerUser } from './actions';
+
+const initialState: FormState = {};
 
 export default function AuthRegisterForm() {
+  const [state, formAction] = useActionState<FormState, FormData>(registerUser, initialState);
+
   return (
     <Card shadow="lg">
-      <form action={registerUser} className="space-y-5">
+      <form action={formAction} className="space-y-5">
+        {state.error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{state.error}</div>
+        )}
         <div>
           <Input
             name="username"

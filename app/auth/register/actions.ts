@@ -8,47 +8,69 @@ import { UserAccountRepository, UserRepository } from '@/database/repositories';
 
 import { hashPassword } from '@/share/utils/password';
 
-export async function registerUser(formData: FormData) {
+export interface FormState {
+  error?: string;
+}
+
+export async function registerUser(prevState: FormState | null, formData: FormData): Promise<FormState> {
   const username = formData.get('username') as string;
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const passwordConfirm = formData.get('passwordConfirm') as string;
 
   if (!username || !username.trim()) {
-    throw new Error('이름을 입력해주세요');
+    return {
+      error: '이름을 입력해주세요',
+    };
   }
 
   if (username.trim().length < 2) {
-    throw new Error('이름은 최소 2자 이상이어야 합니다');
+    return {
+      error: '이름은 최소 2자 이상이어야 합니다',
+    };
   }
 
   if (!email || !email.trim()) {
-    throw new Error('이메일을 입력해주세요');
+    return {
+      error: '이메일을 입력해주세요',
+    };
   }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new Error('올바른 이메일 형식이 아닙니다');
+    return {
+      error: '올바른 이메일 형식이 아닙니다',
+    };
   }
 
   if (!password || !password.trim()) {
-    throw new Error('비밀번호를 입력해주세요');
+    return {
+      error: '비밀번호를 입력해주세요',
+    };
   }
 
   if (!/^\d+$/.test(password)) {
-    throw new Error('비밀번호는 숫자만 입력 가능합니다');
+    return {
+      error: '비밀번호는 숫자만 입력 가능합니다',
+    };
   }
 
   if (password.length < 4) {
-    throw new Error('비밀번호는 최소 4자리 이상이어야 합니다');
+    return {
+      error: '비밀번호는 최소 4자리 이상이어야 합니다',
+    };
   }
 
   if (!passwordConfirm || password !== passwordConfirm) {
-    throw new Error('비밀번호가 일치하지 않습니다');
+    return {
+      error: '비밀번호가 일치하지 않습니다',
+    };
   }
 
   const agreeTerms = formData.get('agreeTerms');
   if (!agreeTerms) {
-    throw new Error('이용약관에 동의해주세요');
+    return {
+      error: '이용약관에 동의해주세요',
+    };
   }
 
   try {
@@ -62,7 +84,9 @@ export async function registerUser(formData: FormData) {
     });
 
     if (existingEmail) {
-      throw new Error('이미 사용중인 이메일입니다');
+      return {
+        error: '이미 사용중인 이메일입니다',
+      };
     }
 
     // 사용자명 중복 확인
@@ -71,7 +95,9 @@ export async function registerUser(formData: FormData) {
     });
 
     if (existingUser) {
-      throw new Error('이미 사용중인 사용자명입니다');
+      return {
+        error: '이미 사용중인 사용자명입니다',
+      };
     }
 
     // 비밀번호 해싱
@@ -107,6 +133,9 @@ export async function registerUser(formData: FormData) {
       throw error;
     }
 
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : '회원가입에 실패했습니다';
+    return {
+      error: errorMessage,
+    };
   }
 }
