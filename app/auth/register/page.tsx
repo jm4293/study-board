@@ -15,8 +15,10 @@ export default function AuthRegisterPage() {
   const [nickname, setNickname] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [emailCheckStatus, setEmailCheckStatus] = useState<"success" | "error" | null>(null);
   const router = useRouter();
 
+  // 회원가입 제출
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -48,6 +50,24 @@ export default function AuthRegisterPage() {
     }
   };
 
+  // 이메일 중복 확인
+  const handleCheckEmail = async () => {
+    if (!email) {
+      setErrorMessage("이메일을 입력해주세요.");
+      return;
+    }
+
+    const res = await fetch("/api/signup/check-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (res.status === 409) {
+      setEmailCheckStatus("error");
+    } else if (res.status === 200) {
+      setEmailCheckStatus("success");
+    }
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-zinc-950 dark:via-black dark:to-zinc-900">
       <div className="flex min-h-screen">
@@ -79,15 +99,38 @@ export default function AuthRegisterPage() {
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               {/* Email Field */}
-              <InputField
-                id="email"
-                name="email"
-                label="Email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <div>
+                <InputField
+                  id="email"
+                  name="email"
+                  label="Email"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
+                  rightSlot={
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600"
+                      onClick={handleCheckEmail}
+                    >
+                      중복 확인
+                    </button>
+                  }
+                />
+                {emailCheckStatus && (
+                  <p
+                    className={`mt-1.5 text-xs ${emailCheckStatus === "success"
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-600 dark:text-red-400"
+                      }`}
+                  >
+                    {emailCheckStatus === "success" ? "사용 가능한 이메일입니다." : "사용 불가능한 이메일입니다."}
+                  </p>
+                )}
+              </div>
 
               {/* Password Field */}
               <InputField
@@ -161,3 +204,4 @@ export default function AuthRegisterPage() {
     </div>
   );
 }
+

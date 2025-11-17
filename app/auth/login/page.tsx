@@ -30,6 +30,7 @@ export default function AuthLoginPage() {
         email,
         password,
       });
+
       if (result?.ok) {
         router.push("/"); // or "/(main)/home"
         return;

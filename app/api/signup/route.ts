@@ -11,28 +11,6 @@ function hashPasswordWithScrypt(plain: string): string {
   return `${salt}:${derivedKey.toString('hex')}`;
 }
 
-export async function GET() {
-  const dataSource = await getDataSource();
-  const userRepository = new UserRepository(dataSource.manager);
-
-  try {
-    const users = await userRepository.find();
-
-    return NextResponse.json({
-      success: true,
-      data: users,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch users',
-      },
-      { status: 500 },
-    );
-  }
-}
-
 export async function POST(request: NextRequest) {
   const dataSource = await getDataSource();
   const userRepository = new UserRepository(dataSource.manager);
@@ -52,6 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 이메일 중복 확인
     const existingEmail = await userAccountRepository.findOne({ where: { email } });
     if (existingEmail) {
       return NextResponse.json(
@@ -63,6 +42,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 사용자 생성
     const user = userRepository.create({
       username,
       nickname,
