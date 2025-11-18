@@ -54,6 +54,8 @@
 
 - 8.1. FRONTEND + BFF + BACKEND
 - 8.2. FRONT + BFF
+  - 8.2.1. Route Handler
+  - 8.2.2. action
 - 8.3. FRONT + BACKEND
 
 ### 리뷰
